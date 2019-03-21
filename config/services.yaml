@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  mztx\pet\Command\:
+    resource: '../src/Command/*'
+    tags:
+      - "pet.cli.command"
+
+  mztx\pet\Application:
+    public: true

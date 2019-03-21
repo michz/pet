@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+/*
+ * Licensed under MIT. See file /LICENSE.
+ */
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$kernel = new \mztx\pet\Kernel(
+    'PET Personal Timetracker',
+    '__DEV__'
+);
+
+$kernel->boot();
+$kernel->getApplication()->run();
