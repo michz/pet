@@ -17,3 +17,6 @@ services:
 
   mztx\pet\Application:
     public: true
+    arguments:
+      $name: "PET - Personal Timetracker"
+      $version: "__DEV__"

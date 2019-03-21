@@ -8,10 +8,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$kernel = new \mztx\pet\Kernel(
-    'PET Personal Timetracker',
-    '__DEV__'
-);
+$kernel = new \mztx\pet\Kernel();
 
 $kernel->boot();
 $kernel->getApplication()->run();
