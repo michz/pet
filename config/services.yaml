@@ -1,3 +1,6 @@
+parameters:
+  env(PET_DATETIME_FORMAT): 'Y-m-d H:i:s'
+
 services:
   _defaults:
     autowire: true
@@ -7,16 +10,26 @@ services:
   mztx\pet\Command\:
     resource: '../src/Command/*'
     tags:
-      - "pet.cli.command"
+      - 'pet.cli.command'
 
   mztx\pet\Command\CacheClearCommand:
     tags:
-      - "pet.cli.command"
+      - 'pet.cli.command'
     arguments:
       $configDir: '%env(PET_CONFIG_DIR)%'
+
+  mztx\pet\Tracker\ActiveTrackerManagerInterface:
+    class: mztx\pet\Tracker\ActiveTrackerManager
+    arguments:
+      $configDir: '%env(PET_CONFIG_DIR)%'
+      $dateTimeFormat: '%env(PET_DATETIME_FORMAT)%'
 
   mztx\pet\Application:
     public: true
     arguments:
-      $name: "PET - Personal Timetracker"
-      $version: "__DEV__"
+      $name: 'PET - Personal Timetracker'
+      $version: '__DEV__'
+
+  Symfony\Component\EventDispatcher\EventDispatcherInterface:
+    class: Symfony\Component\EventDispatcher\EventDispatcher
+
