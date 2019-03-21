@@ -11,6 +11,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -21,14 +22,26 @@ class Kernel extends Application
 
     public function boot(): void
     {
-        // @TODO Load Container cached if existing
+        @\umask(0077);
 
         $configDir = $this->getConfigDirectory();
-        $containerBuilder = new ContainerBuilder();
-        $this->build($containerBuilder);
 
-        $containerBuilder->compile(true);
-        $this->container = $containerBuilder;
+        // Create container cache if not existing yet
+        $cachedContainerFile = $configDir . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'container.php';
+        if (false === \file_exists($cachedContainerFile)) {
+            $containerBuilder = new ContainerBuilder();
+            $this->build($containerBuilder);
+            $containerBuilder->compile();
+            $this->container = $containerBuilder;
+
+            $dumper = new PhpDumper($containerBuilder);
+            \file_put_contents($cachedContainerFile, $dumper->dump());
+        }
+
+        // Load cached container
+        require_once $cachedContainerFile;
+        // ProjectServiceContainer is defined in cache container file
+        $this->container = new \ProjectServiceContainer();
     }
 
     public function build(ContainerBuilder $containerBuilder): void
@@ -42,7 +55,7 @@ class Kernel extends Application
 
         $applicationDefinition = $containerBuilder->getDefinition(Application::class);
         $commandServiceDefinitions = $containerBuilder->findTaggedServiceIds('pet.cli.command');
-        foreach ($commandServiceDefinitions as $id => $commandServiceDefinition) {
+        foreach (\array_keys($commandServiceDefinitions) as $id) {
             $applicationDefinition->addMethodCall('add', [new Reference($id)]);
         }
     }
@@ -65,12 +78,19 @@ class Kernel extends Application
             throw new \RuntimeException('Could not determine config dir. Please provide one explicitly by settings ENV variable PET_CONFIG_DIR.');
         }
 
+        $this->makeSureDirectoryExists($configdir);
+        $this->makeSureDirectoryExists($configdir . DIRECTORY_SEPARATOR . 'cache');
+
+        \putenv('PET_CONFIG_DIR=' . $configdir);
+        return $configdir;
+    }
+
+    private function makeSureDirectoryExists(string $configdir): void
+    {
         if (false === \is_dir($configdir)) {
             if (false === @\mkdir($configdir, 0700, true)) {
-                throw new \RuntimeException('Could not create config directory.');
+                throw new \RuntimeException('Could not create directory `' . $configdir . '`.');
             }
         }
-
-        return $configdir;
     }
 }

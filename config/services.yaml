@@ -9,5 +9,11 @@ services:
     tags:
       - "pet.cli.command"
 
+  mztx\pet\Command\CacheClearCommand:
+    tags:
+      - "pet.cli.command"
+    arguments:
+      $configDir: '%env(PET_CONFIG_DIR)%'
+
   mztx\pet\Application:
     public: true
