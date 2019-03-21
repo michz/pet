@@ -14,5 +14,10 @@
     },
     "require-dev": {
         "symplify/easy-coding-standard": "^5.4"
+    },
+    "config": {
+        "platform": {
+            "php": "7.1.3"
+        }
     }
 }
